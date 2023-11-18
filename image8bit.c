@@ -319,6 +319,23 @@ int ImageMaxval(Image img) { ///
 void ImageStats(Image img, uint8* min, uint8* max) { ///
   assert (img != NULL);
   // Insert your code here!
+  int index;
+  int x = 1;
+  int y = 1;
+  uint8 pixel = ImageGetPixel(img, 0, 0);
+  uint8 MinGrayLevel = pixel;
+  uint8 MaxGrayLevel = pixel;
+  for(index = 1; index < img->height*img->width; index++){
+    pixel = ImageGetPixel(img, x, y);
+    x++;
+    y++;
+    if(pixel < MinGrayLevel)
+      MinGrayLevel = pixel;
+    else if(pixel > MaxGrayLevel)
+      MaxGrayLevel = pixel; 
+  }
+  min = &MinGrayLevel;
+  max = &MaxGrayLevel;
 }
 
 /// Check if pixel position (x,y) is inside img.
@@ -346,6 +363,7 @@ int ImageValidRect(Image img, int x, int y, int w, int h) { ///
 static inline int G(Image img, int x, int y) {
   int index;
   // Insert your code here!
+  index = y * img->width + x;
   assert (0 <= index && index < img->width*img->height);
   return index;
 }
