@@ -172,6 +172,26 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
   assert (height >= 0);
   assert (0 < maxval && maxval <= PixMax);
   // Insert your code here!
+  Image img = (Image)malloc(sizeof(Image));
+  if(img == NULL){
+    errno = 1;
+    errCause = "Memory allocation failed.";
+    return NULL;
+  }
+  img->width = width;
+  img->height = height;
+  img->pixel = (uint8*)malloc(sizeof(uint8) * width * height);
+  if(img->pixel == NULL){
+    errno = 2;
+    errCause = "Memory allocation failed.";
+    free(img); 
+    return NULL;
+  }
+  for(int i = 0; i < width * height; ++i){
+    img->pixel[i] = 0;
+  }
+
+  return img;
 }
 
 /// Destroy the image pointed to by (*imgp).
@@ -182,6 +202,11 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
 void ImageDestroy(Image* imgp) { ///
   assert (imgp != NULL);
   // Insert your code here!
+  if (*imgp != NULL) {
+    free((*imgp)->pixel); 
+    free(*imgp);           
+    *imgp = NULL;          
+  }
 }
 
 
