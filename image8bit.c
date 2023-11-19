@@ -349,6 +349,12 @@ int ImageValidPos(Image img, int x, int y) { ///
 int ImageValidRect(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   // Insert your code here!
+  int leftEdge = x;
+  int rightEdge = x + w;
+  int topEdge = y;
+  int botEdge = y + h;
+
+  return leftEdge >= 0 && rightEdge <= img->width && topEdge >= 0 && botEdge <= img->height;
 }
 
 /// Pixel get & set operations
