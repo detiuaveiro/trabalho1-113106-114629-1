@@ -180,6 +180,7 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
   }
   img->width = width;
   img->height = height;
+  img->maxval = maxval;
   img->pixel = (uint8*)malloc(sizeof(uint8) * width * height);
   if(img->pixel == NULL){
     errno = 2;
@@ -187,8 +188,8 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
     free(img); 
     return NULL;
   }
-  for(int i = 0; i < width * height; ++i){
-    img->pixel[i] = 0;
+  for(int index = 0; index < width * height; ++index){
+    img->pixel[index] = 0;
   }
 
   return img;
@@ -399,6 +400,9 @@ void ImageSetPixel(Image img, int x, int y, uint8 level) { ///
 void ImageNegative(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+  for(int index = 0; index < img->height*img->width; index++){
+    img->pixel[index] = PixMax - img->pixel[index];
+  }
 }
 
 /// Apply threshold to image.
@@ -407,6 +411,13 @@ void ImageNegative(Image img) { ///
 void ImageThreshold(Image img, uint8 thr) { ///
   assert (img != NULL);
   // Insert your code here!
+  for(int index = 0; index < img->height*img->width; index++){
+    uint8 level = img->pixel[index];
+    if(level < thr)
+      img->pixel[index] = 0;
+    else
+      img->pixel[index] = img->maxval;
+  }
 }
 
 /// Brighten image by a factor.
@@ -415,8 +426,16 @@ void ImageThreshold(Image img, uint8 thr) { ///
 /// darken the image if factor<1.0.
 void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
-  // ? assert (factor >= 0.0);
+  assert (factor >= 0.0);
   // Insert your code here!
+  for(int index = 0; index < img->height*img->width; index++){
+    uint8 level = img->pixel[index];
+    double newLevel = level * factor;
+    if(newLevel > img->maxval)
+      img->pixel[index] = img->maxval;
+    else  
+      img->pixel[index] = (uint8)newLevel;
+  }
 }
 
 
