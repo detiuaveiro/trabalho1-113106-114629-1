@@ -473,8 +473,15 @@ Image ImageRotate(Image img) { ///
   if (newImg == NULL) {
     return NULL;
   }
-  for(int index = 0; index < img->height*img->width; index++){
-    newImg->pixel[index] = img->pixel[img->width + index * img->width - index/img->width];
+  int width = ImageWidth(img);
+  int height = ImageHeight(img);
+  for(int y = 0; y < img->height; y++){
+    for(int x = 0; x < img->width; x++){
+      int rotatedX = width - 1 - y;
+      int rotatedY = x;
+      uint8 level = ImageGetPixel(img, rotatedX, rotatedY);
+      ImageSetPixel(newImg, x, y, level);
+    }
   }
   return newImg;
 }
@@ -493,8 +500,13 @@ Image ImageMirror(Image img) { ///
   if (newImg == NULL) {
     return NULL;
   }
-  for(int index = 0; index < img->height*img->width; index++){
-    newImg->pixel[index] = img->pixel[index + img->width - 1];
+  int width = ImageWidth(img);
+  for(int y = 0; y < img->height; y++){
+    for(int x = 0; x < img->width; x++){
+      int newX = width - x - 1;
+      uint8 level = ImageGetPixel(img, newX, y);
+      ImageSetPixel(newImg, x, y, level);
+    }
   }
   return newImg;
 }
