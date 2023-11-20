@@ -469,6 +469,14 @@ void ImageBrighten(Image img, double factor) { ///
 Image ImageRotate(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+  Image newImg = ImageCreate(img->height, img->width, img->maxval);
+  if (newImg == NULL) {
+    return NULL;
+  }
+  for(int index = 0; index < img->height*img->width; index++){
+    newImg->pixel[index] = img->pixel[img->width + index * img->width - index/img->width];
+  }
+  return newImg;
 }
 
 /// Mirror an image = flip left-right.
@@ -481,6 +489,14 @@ Image ImageRotate(Image img) { ///
 Image ImageMirror(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+  Image newImg = ImageCreate(img->height, img->width, img->maxval);
+  if (newImg == NULL) {
+    return NULL;
+  }
+  for(int index = 0; index < img->height*img->width; index++){
+    newImg->pixel[index] = img->pixel[index + img->width - 1];
+  }
+  return newImg;
 }
 
 /// Crop a rectangular subimage from img.
@@ -499,6 +515,23 @@ Image ImageCrop(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   assert (ImageValidRect(img, x, y, w, h));
   // Insert your code here!
+  Image newImg = ImageCreate(h, w, img->maxval);
+  if (newImg == NULL) {
+    return NULL;
+  }
+  int coordX = x;
+  int coordY = y;
+  for(int index = 0; index < w * h; index++){
+    uint8 level = ImageGetPixel(img, coordX, coordY);
+    if(coordX >= w){
+      coordX = x;
+      coordY++;
+    }
+    else
+      coordX++;
+    ImageSetPixel(newImg, coordX, coordY, level);
+  }
+  return newImg;
 }
 
 
