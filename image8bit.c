@@ -440,7 +440,7 @@ void ImageBrighten(Image img, double factor) { ///
     if(newLevel > img->maxval)
       img->pixel[index] = img->maxval;
     else  
-      img->pixel[index] = (uint8)newLevel;
+      img->pixel[index] = (uint8)(newLevel + 0.5);
   }
 }
 
@@ -596,7 +596,7 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
       if (new_x >= 0 && new_x < img1Width && new_y >= 0 && new_y < img1Height) {
         uint8 pixel1 = ImageGetPixel(img1, new_x, new_y);
         uint8 pixel2 = ImageGetPixel(img2, j, i);
-        uint8 blended_pixel = (uint8)(alpha * pixel2 + (1 - alpha) * pixel1);
+        uint8 blended_pixel = (uint8)(alpha * pixel2 + (1 - alpha) * pixel1 + 0.5);
         ImageSetPixel(img1, new_x, new_y, blended_pixel);
       }
     }
