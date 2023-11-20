@@ -527,21 +527,17 @@ Image ImageCrop(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   assert (ImageValidRect(img, x, y, w, h));
   // Insert your code here!
-  Image newImg = ImageCreate(h, w, img->maxval);
+  Image newImg = ImageCreate(w, h, img->maxval);
   if (newImg == NULL) {
     return NULL;
   }
   int coordX = x;
   int coordY = y;
-  for(int index = 0; index < w * h; index++){
-    uint8 level = ImageGetPixel(img, coordX, coordY);
-    if(coordX >= w){
-      coordX = x;
-      coordY++;
+  for(coordY = y; coordY < y + h; coordY++){
+    for(coordX = x; coordX < x + w; coordX++){
+      uint8 level = ImageGetPixel(img, coordX, coordY);
+      ImageSetPixel(newImg, coordX - x, coordY - y, level);
     }
-    else
-      coordX++;
-    ImageSetPixel(newImg, coordX, coordY, level);
   }
   return newImg;
 }
