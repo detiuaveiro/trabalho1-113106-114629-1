@@ -10,8 +10,8 @@
 /// 2013, 2023
 
 // Student authors (fill in below):
-// NMec:  Name:
-// 
+// NMec: 114629 Name: Tiago Costa
+// NMec: 113106 Name: Tiago Almeida
 // 
 // 
 // Date:
@@ -575,6 +575,29 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
+  int img1Width = img1->width;
+    int img1Height = img1->height;
+    int img2Width = img2->width;
+    int img2Height = img2->height;
+
+    for (int i = 0; i < img2Height; ++i) {
+        for (int j = 0; j < img2Width; ++j) {
+            int new_x = x + j;
+            int new_y = y + i;
+
+            if (new_x >= 0 && new_x < img1Width && new_y >= 0 && new_y < img1Height) {
+                uint8 pixel1 = ImageGetPixel(img1, new_x, new_y);
+                uint8 pixel2 = ImageGetPixel(img2, j, i);
+
+                
+                uint8 blended_pixel = (uint8)(alpha * pixel2 + (1 - alpha) * pixel1);
+
+                
+                ImageSetPixel(img1, new_x, new_y, blended_pixel);
+            }
+        }
+    }
+  
 }
 
 /// Compare an image to a subimage of a larger image.
