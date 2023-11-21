@@ -172,7 +172,7 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
   assert (height >= 0);
   assert (0 < maxval && maxval <= PixMax);
   // Insert your code here!
-  Image img = (Image)malloc(sizeof(Image));
+  Image img = (Image)malloc(sizeof(struct image));
   if(img == NULL){
     errno = 1;
     errCause = "Memory allocation failed.";
@@ -474,7 +474,6 @@ Image ImageRotate(Image img) { ///
     return NULL;
   }
   int width = ImageWidth(img);
-  int height = ImageHeight(img);
   for(int y = 0; y < img->height; y++){
     for(int x = 0; x < img->width; x++){
       int rotatedX = width - 1 - y;
@@ -615,7 +614,7 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
     return 0;
   for(int coordY = y; coordY <= img1->height - img2->height; coordY++){
     for(int coordX = x; coordX <= img1->width - img2->width; coordX++){
-      if(ImageGetPixel(img1, coordX, coordY) != ImageGetPixel(img2, coordX, coordY))
+      if(ImageGetPixel(img1, coordX + x, coordY + y) != ImageGetPixel(img2, coordX, coordY))
         return 0;
     }
   }
@@ -630,6 +629,16 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
   // Insert your code here!
+  for(int y = 0; y < img1->height; y++){
+    for(int x = 0; x < img1->width; x++){
+      if(ImageMatchSubImage(img1, x, y, img2) == 1){
+        *px = x;
+        *py = y;
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
 
 
