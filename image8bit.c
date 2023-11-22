@@ -657,9 +657,6 @@ void ImageBlur(Image img, int dx, int dy) { ///
   int height = img->height;
 
   Image tempImg = ImageCreate(width, height, img->maxval);
-  if (tempImg == NULL) {
-    return;
-  }
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
