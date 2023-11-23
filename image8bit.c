@@ -650,43 +650,40 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 /// The image is changed in-place.
 void ImageBlur(Image img, int dx, int dy) { ///
   // Insert your code here!
-   assert(img != NULL);
+  assert(img != NULL);
   assert(dx >= 0 && dy >= 0);
 
   int width = img->width;
   int height = img->height;
 
   Image tempImg = ImageCreate(width, height, img->maxval);
+  if (tempImg == NULL) {
+    return;
+  }
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       int sum = 0;
-      int count = 0;
+      double count = 0;
 
-      for (int i = -dy; i <= dy; i++) {
-        for (int j = -dx; j <= dx; j++) {
-          int new_x = x + j;
-          int new_y = y + i;
-
-          if (new_x >= 0 && new_x < width && new_y >= 0 && new_y < height) {
-            sum += ImageGetPixel(img, new_x, new_y);
+      for (int newY = y - dy; newY <= y + dy; newY++) {
+        for (int newX = x - dx; newX <= x + dx; newX++) {
+          if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+            sum += (ImageGetPixel(img, newX, newY));
             count++;
           }
         }
       }
 
-      if (count > 0) {
-        uint8 meanValue = (uint8)(sum / count + 0.5);
-        ImageSetPixel(tempImg, x, y, meanValue);
-      }
+      uint8 meanValue = (uint8)(sum / count + 0.5);
+      ImageSetPixel(tempImg, x, y, meanValue);
+
     }
   }
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      uint8 blurredValue = (uint8)(ImageGetPixel(tempImg, x, y) + 0.5);
-      ImageSetPixel(img, x, y, blurredValue);
-    }
+  for (int index = 0; index < height * width; index++) {
+      img->pixel[index] = tempImg->pixel[index];
   }
+
   ImageDestroy(&tempImg);
 }
 
