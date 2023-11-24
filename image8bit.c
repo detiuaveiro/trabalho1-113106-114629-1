@@ -349,11 +349,14 @@ int ImageValidPos(Image img, int x, int y) { ///
 int ImageValidRect(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   // Insert your code here!
+
+  // Get coordinates for each edge.
   int leftEdge = x;
   int rightEdge = x + w;
   int topEdge = y;
   int botEdge = y + h;
 
+  // Check if coordinates are inside img.
   return leftEdge >= 0 && rightEdge <= img->width && topEdge >= 0 && botEdge <= img->height;
 }
 
@@ -553,16 +556,22 @@ void ImagePaste(Image img1, int x, int y, Image img2) { ///
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
+
+  // Get height and width for each image.
   int img1Width = img1->width;
   int img1Height= img1->height;
   int img2Width = img2->width;
   int img2Height = img2->height; 
   
+  // Nested loop for the pasting process.
   for (int i = 0; i < img2Height; ++i) {
     for (int j = 0; j < img2Width; ++j) {
+      // Calculating coordinates where img2 pixels will be pasted into img1.
       int new_x = x + j;
       int new_y = y + i;
 
+
+      // Check if coordinates are inbounds and then set the pixel.
       if (new_x >= 0 && new_x < img1Width && new_y >= 0 && new_y < img1Height) {
         uint8 pixel = ImageGetPixel(img2, j, i);
         ImageSetPixel(img1, new_x, new_y, pixel);
@@ -582,16 +591,22 @@ void ImageBlend(Image img1, int x, int y, Image img2, double alpha) { ///
   assert (img2 != NULL);
   assert (ImageValidRect(img1, x, y, img2->width, img2->height));
   // Insert your code here!
+
+  // Get height and width for each image.
   int img1Width = img1->width;
   int img1Height = img1->height;
   int img2Width = img2->width;
   int img2Height = img2->height;
 
+
+  // Nested loop for the blending process (similarly to the paste function).
   for (int i = 0; i < img2Height; ++i) {
     for (int j = 0; j < img2Width; ++j) {
       int new_x = x + j;
       int new_y = y + i;
 
+
+      // Check if coordinates are inbounds, then get img1 and img2 pixel value, apply alpha modifier and set pixel.
       if (new_x >= 0 && new_x < img1Width && new_y >= 0 && new_y < img1Height) {
         uint8 pixel1 = ImageGetPixel(img1, new_x, new_y);
         uint8 pixel2 = ImageGetPixel(img2, j, i);
@@ -656,34 +671,37 @@ void ImageBlur(Image img, int dx, int dy) { ///
   int width = img->width;
   int height = img->height;
 
+  // Create temporary image to store modified pixels.
   Image tempImg = ImageCreate(width, height, img->maxval);
-  if (tempImg == NULL) {
-    return;
-  }
 
+
+  // Loop through each pixel.
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       int sum = 0;
       double count = 0;
 
+
+      // Loop through neighbour pixels with "dy" and "dx" as the radius.
       for (int newY = y - dy; newY <= y + dy; newY++) {
         for (int newX = x - dx; newX <= x + dx; newX++) {
-          if (newX >= 0 && newX < width && newY >= 0 && newY < height) {
+          if (ImageValidPos(img, newX, newY)) {
             sum += (ImageGetPixel(img, newX, newY));
             count++;
           }
         }
       }
-
+      // Calculate mean value which creates the blurring effect, and then set the pixel in the temporary image.
       uint8 meanValue = (uint8)(sum / count + 0.5);
       ImageSetPixel(tempImg, x, y, meanValue);
 
     }
   }
+  // Transfer the temporary image pixels into the original image.
   for (int index = 0; index < height * width; index++) {
       img->pixel[index] = tempImg->pixel[index];
   }
-
+  // Delete the temporary image.
   ImageDestroy(&tempImg);
 }
 
