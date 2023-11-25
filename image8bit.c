@@ -172,26 +172,39 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
   assert (height >= 0);
   assert (0 < maxval && maxval <= PixMax);
   // Insert your code here!
+
+  // Allocate memory for the image structure.
   Image img = (Image)malloc(sizeof(struct image));
+
+  // Verify if the allocation was done successfully.
   if(img == NULL){
     errno = 1;
     errCause = "Memory allocation failed.";
     return NULL;
   }
+
+  // Give values to the image properties.
   img->width = width;
   img->height = height;
   img->maxval = maxval;
+
+  // Allocate memory for the pixel data.
   img->pixel = (uint8*)malloc(sizeof(uint8) * width * height);
+
+  // Verify if the allocation was done successfully.
   if(img->pixel == NULL){
     errno = 2;
     errCause = "Memory allocation failed.";
     free(img); 
     return NULL;
   }
+
+  // Give all pixels the gray value 0 (black).
   for(int index = 0; index < width * height; ++index){
     img->pixel[index] = 0;
   }
 
+  // If all allocations worked, return the new image created. 
   return img;
 }
 
@@ -203,6 +216,10 @@ Image ImageCreate(int width, int height, uint8 maxval) { ///
 void ImageDestroy(Image* imgp) { ///
   assert (imgp != NULL);
   // Insert your code here!
+
+  // verify if the image is not NULL. If not, free the memory allocated for pixel data and 
+  // then free the memory allocated for the image structure.
+  // Finally, end by setting the value of imgp to NULL. 
   if (*imgp != NULL) {
     free((*imgp)->pixel); 
     free(*imgp);           
@@ -320,23 +337,23 @@ int ImageMaxval(Image img) { ///
 void ImageStats(Image img, uint8* min, uint8* max) { ///
   assert (img != NULL);
   // Insert your code here!
-  int index;
-  int x = 1;
-  int y = 1;
-  uint8 pixel = ImageGetPixel(img, 0, 0);
-  uint8 MinGrayLevel = pixel;
-  uint8 MaxGrayLevel = pixel;
-  for(index = 1; index < img->height*img->width; index++){
-    pixel = ImageGetPixel(img, x, y);
-    x++;
-    y++;
-    if(pixel < MinGrayLevel)
-      MinGrayLevel = pixel;
-    else if(pixel > MaxGrayLevel)
-      MaxGrayLevel = pixel; 
+
+  // Get the gray value of the first pixel and give it to the variables min and max.
+  uint8 pixel = img->pixel[0];
+  *min = pixel;
+  *max = pixel;
+
+  // Loop through the remaining pixels (excluding (0,0)). 
+  for(int index = 1; index < img->height*img->width; index++){
+
+      pixel = img->pixel[index];
+      
+      // Verify if the current pixel has gray value lower or bigger than the variables min and max, respectively. 
+      if(pixel < *min)
+        *min = pixel;
+      else if(pixel > *max)
+        *max = pixel; 
   }
-  min = &MinGrayLevel;
-  max = &MaxGrayLevel;
 }
 
 /// Check if pixel position (x,y) is inside img.
@@ -373,7 +390,11 @@ int ImageValidRect(Image img, int x, int y, int w, int h) { ///
 static inline int G(Image img, int x, int y) {
   int index;
   // Insert your code here!
+
+  // Transform the x and y coordinates into an index.
   index = y * img->width + x;
+  
+  // Verify if the index value is valid. If it is, return its value.
   assert (0 <= index && index < img->width*img->height);
   return index;
 }
@@ -409,8 +430,14 @@ void ImageSetPixel(Image img, int x, int y, uint8 level) { ///
 void ImageNegative(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
-  for(int index = 0; index < img->height*img->width; index++){
-    img->pixel[index] = PixMax - img->pixel[index];
+
+  // Loop through each pixel of img.
+  for(int y = 0; y < img->height; y++){
+    for(int x = 0; x < img->width; x++){
+      // Apply the negative effect to the pixel. 
+      uint8 newLevel = PixMax - ImageGetPixel(img, x, y);
+      ImageSetPixel(img, x, y, newLevel);
+    }
   }
 }
 
@@ -420,12 +447,19 @@ void ImageNegative(Image img) { ///
 void ImageThreshold(Image img, uint8 thr) { ///
   assert (img != NULL);
   // Insert your code here!
-  for(int index = 0; index < img->height*img->width; index++){
-    uint8 level = img->pixel[index];
-    if(level < thr)
-      img->pixel[index] = 0;
-    else
-      img->pixel[index] = img->maxval;
+
+  // Loop through each pixel of img.
+  for(int y = 0; y < img->height; y++){
+    for(int x = 0; x < img->width; x++){
+      // Get the gray level of the pixel currently on the loop.
+      uint8 level = ImageGetPixel(img, x, y);
+      // If the gray level is lower than the threshold, make it black.
+      if(level < thr)
+        ImageSetPixel(img, x, y, 0);
+      // If the gray level is higher than the threshold, make it white.
+      else
+        ImageSetPixel(img, x, y, img->maxval);
+    }
   }
 }
 
@@ -437,13 +471,21 @@ void ImageBrighten(Image img, double factor) { ///
   assert (img != NULL);
   assert (factor >= 0.0);
   // Insert your code here!
-  for(int index = 0; index < img->height*img->width; index++){
-    uint8 level = img->pixel[index];
-    double newLevel = level * factor;
-    if(newLevel > img->maxval)
-      img->pixel[index] = img->maxval;
-    else  
-      img->pixel[index] = (uint8)(newLevel + 0.5);
+
+  // Loop through each pixel of img.
+  for(int y = 0; y < img->height; y++){
+    for(int x = 0; x < img->width; x++){
+      // Get the gray level of the pixel currently on the loop.
+      uint8 level = ImageGetPixel(img, x, y);
+      // Apply the brighten effect to the pixel.
+      uint8 newLevel = (uint8)(level * factor + 0.5);
+      // If the new gray level is higher than the maxval of the image, set the pixel gray level to maxval (white).
+      if(newLevel > img->maxval)
+        ImageSetPixel(img, x, y, img->maxval);
+      // If the new gray level is lower than the maxval of the image, set the pixel gray level to newLevel.
+      else  
+        ImageSetPixel(img, x, y, newLevel);
+    }
   }
 }
 
@@ -472,19 +514,28 @@ void ImageBrighten(Image img, double factor) { ///
 Image ImageRotate(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+
+  // Create a new image, equal to the original image, to alter and return at the end.
   Image newImg = ImageCreate(img->height, img->width, img->maxval);
+  // If ImageCreate went wrong, return NULL.
   if (newImg == NULL) {
     return NULL;
   }
-  int width = ImageWidth(img);
+
+  // Loop through each pixel of img.
   for(int y = 0; y < img->height; y++){
     for(int x = 0; x < img->width; x++){
-      int rotatedX = width - 1 - y;
+      // Get the gray values of the original image rotated and give them to the new image.
+      // This way, the new image will become a copy of the original image rotated, and 
+      // the original image will not be altered.
+      int rotatedX = img->width - 1 - y;
       int rotatedY = x;
       uint8 level = ImageGetPixel(img, rotatedX, rotatedY);
       ImageSetPixel(newImg, x, y, level);
     }
   }
+
+  // Return the new image, after it becomes a copy of the original image rotated.
   return newImg;
 }
 
@@ -498,18 +549,27 @@ Image ImageRotate(Image img) { ///
 Image ImageMirror(Image img) { ///
   assert (img != NULL);
   // Insert your code here!
+
+  // Create a new image, equal to the original image, to alter and return at the end.
   Image newImg = ImageCreate(img->height, img->width, img->maxval);
+  // If ImageCreate went wrong, return NULL.
   if (newImg == NULL) {
     return NULL;
   }
-  int width = ImageWidth(img);
+
+  // Loop through each pixel of img.
   for(int y = 0; y < img->height; y++){
     for(int x = 0; x < img->width; x++){
-      int newX = width - x - 1;
+      // Get the gray values of the original image mirrored and give them to the new image.
+      // This way, the new image will become a copy of the original image mirrored, and 
+      // the original image will not be altered.
+      int newX = img->width - x - 1;
       uint8 level = ImageGetPixel(img, newX, y);
       ImageSetPixel(newImg, x, y, level);
     }
   }
+
+  // Return the new image, after it becomes a copy of the original image mirrored.
   return newImg;
 }
 
@@ -529,18 +589,26 @@ Image ImageCrop(Image img, int x, int y, int w, int h) { ///
   assert (img != NULL);
   assert (ImageValidRect(img, x, y, w, h));
   // Insert your code here!
+
+  // Create a new image, with the size of the specified crop, to alter and return at the end.
   Image newImg = ImageCreate(w, h, img->maxval);
+  // If ImageCreate went wrong, return NULL.
   if (newImg == NULL) {
     return NULL;
   }
-  int coordX = x;
-  int coordY = y;
-  for(coordY = y; coordY < y + h; coordY++){
-    for(coordX = x; coordX < x + w; coordX++){
+
+  // Loop through each pixel of the original image within the crop borders.
+  for(int coordY = y; coordY < y + h; coordY++){
+    for(int coordX = x; coordX < x + w; coordX++){
+      // Get the gray values ofthe current pixel being looped and give it to the new image.
+      // The coordinates current on the loop are that of the pixel on the original image, not on the 
+      // cropped image, so we have to correct that. 
       uint8 level = ImageGetPixel(img, coordX, coordY);
       ImageSetPixel(newImg, coordX - x, coordY - y, level);
     }
   }
+
+  // Return the new image, after it becomes a copy of the original image cropped.
   return newImg;
 }
 
@@ -625,14 +693,23 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
   assert (img2 != NULL);
   assert (ImageValidPos(img1, x, y));
   // Insert your code here!
+
+  // Verify if img2 is completely inside img1. If not return 0 (false).
   if(img2->width + x > img1->width || img2->height + y > img1->height)
     return 0;
+  
+  // Loop through each pixel of img2.
   for(int coordY = y; coordY <= img1->height - img2->height; coordY++){
     for(int coordX = x; coordX <= img1->width - img2->width; coordX++){
+
+      // Check if the gray value of the pixel in img2 is equal to that of img1. If not return 0 (false). 
       if(ImageGetPixel(img1, coordX + x, coordY + y) != ImageGetPixel(img2, coordX, coordY))
         return 0;
     }
   }
+
+  // If the loop didn't return 0 (false) till now, it means all pixels of img2 are equal to img1 in this position.
+  // For that reason returns 1 (true).
   return 1;
 }
 
@@ -644,15 +721,23 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
   assert (img1 != NULL);
   assert (img2 != NULL);
   // Insert your code here!
+
+  // Loop through each pixel of img1.
   for(int y = 0; y < img1->height; y++){
     for(int x = 0; x < img1->width; x++){
+
+      // Verify if img2 matches img1 starting on the pixel currently in the loop.
       if(ImageMatchSubImage(img1, x, y, img2) == 1){
+
+        // If it matches, give px and py the values of the current x and y and return 1 (true). 
         *px = x;
         *py = y;
         return 1;
       }
     }
   }
+
+  // If at no time return 1 was activated, it means img2 doesn't match img1 anywhere, so return 0 (false).
   return 0;
 }
 
