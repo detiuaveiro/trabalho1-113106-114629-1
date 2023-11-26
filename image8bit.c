@@ -694,14 +694,19 @@ int ImageMatchSubImage(Image img1, int x, int y, Image img2) { ///
   assert (ImageValidPos(img1, x, y));
   // Insert your code here!
 
+
+  // Verify if img2 is completely inside img1. If not return 0 (false).
+  if(img2->width + x > img1->width || img2->height + y > img1->height)
+    return 0;
+  
+  
   // Verify if img2 is completely inside img1. If not return 0 (false).
   if(img2->width + x > img1->width || img2->height + y > img1->height)
     return 0;
   
   // Loop through each pixel of img2.
-  for(int coordY = y; coordY <= img1->height - img2->height; coordY++){
-    for(int coordX = x; coordX <= img1->width - img2->width; coordX++){
-
+  for(int coordY = 0; coordY < img2->height; coordY++){
+    for(int coordX = 0; coordX < img2->width; coordX++){
       // Check if the gray value of the pixel in img2 is equal to that of img1. If not return 0 (false). 
       if(ImageGetPixel(img1, coordX + x, coordY + y) != ImageGetPixel(img2, coordX, coordY))
         return 0;
@@ -724,11 +729,18 @@ int ImageLocateSubImage(Image img1, int* px, int* py, Image img2) { ///
 
   // Loop through each pixel of img1.
   for(int y = 0; y < img1->height; y++){
+
+    // If at no time return 1 was activated, it means img2 doesn't match img1 anywhere, so return 0 (false).
+    if(y + img2->height > img1->height){ 
+      return 0; 
+    }
+
     for(int x = 0; x < img1->width; x++){
 
-      // Verify if img2 matches img1 starting on the pixel currently in the loop.
-      if(ImageMatchSubImage(img1, x, y, img2) == 1){
+      if(x + img2->width > img1->width){ break; }
 
+      // Verify if img2 matches img1 starting on the pixel currently in the loop.
+      if(ImageMatchSubImage(img1, x, y, img2)){
         // If it matches, give px and py the values of the current x and y and return 1 (true). 
         *px = x;
         *py = y;
